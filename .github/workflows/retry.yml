@@ -30,15 +30,13 @@ jobs:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
           SSH_KEY_ONELINE=$(echo "$SSH_PUBLIC_KEY" | tr -d '\n')
-          cat > terraform.tfvars <<EOF
-tenancy_ocid     = "$OCI_TENANCY_OCID"
-user_ocid        = "$OCI_USER_OCID"
-fingerprint      = "$OCI_FINGERPRINT"
-private_key_path = "~/.oci/oci_api_key.pem"
-region           = "ap-chuncheon-1"
-compartment_ocid = "$OCI_COMPARTMENT_OCID"
-ssh_public_key   = "$SSH_KEY_ONELINE"
-EOF
+          printf 'tenancy_ocid     = "%s"\n' "$OCI_TENANCY_OCID" > terraform.tfvars
+          printf 'user_ocid        = "%s"\n' "$OCI_USER_OCID" >> terraform.tfvars
+          printf 'fingerprint      = "%s"\n' "$OCI_FINGERPRINT" >> terraform.tfvars
+          printf 'private_key_path = "~/.oci/oci_api_key.pem"\n' >> terraform.tfvars
+          printf 'region           = "ap-chuncheon-1"\n' >> terraform.tfvars
+          printf 'compartment_ocid = "%s"\n' "$OCI_COMPARTMENT_OCID" >> terraform.tfvars
+          printf 'ssh_public_key   = "%s"\n' "$SSH_KEY_ONELINE" >> terraform.tfvars
 
       - name: Terraform Init
         run: terraform init
