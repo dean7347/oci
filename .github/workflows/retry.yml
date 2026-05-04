@@ -15,6 +15,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Restore Terraform state
+        uses: actions/cache@v4
+        with:
+          path: terraform.tfstate
+          key: terraform-state
+
       - name: Write OCI private key
         run: |
           mkdir -p ~/.oci
@@ -45,6 +51,13 @@ jobs:
         id: apply
         run: terraform apply -auto-approve
         continue-on-error: true
+
+      - name: Save Terraform state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: terraform.tfstate
+          key: terraform-state-${{ github.run_id }}
 
       - name: 성공 시 워크플로우 비활성화
         if: steps.apply.outcome == 'success'
