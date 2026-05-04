@@ -22,16 +22,23 @@ jobs:
           chmod 600 ~/.oci/oci_api_key.pem
 
       - name: Write tfvars
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_COMPARTMENT_OCID: ${{ secrets.OCI_COMPARTMENT_OCID }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
+          SSH_KEY_ONELINE=$(echo "$SSH_PUBLIC_KEY" | tr -d '\n')
           cat > terraform.tfvars <<EOF
-          tenancy_ocid     = "${{ secrets.OCI_TENANCY_OCID }}"
-          user_ocid        = "${{ secrets.OCI_USER_OCID }}"
-          fingerprint      = "${{ secrets.OCI_FINGERPRINT }}"
-          private_key_path = "~/.oci/oci_api_key.pem"
-          region           = "ap-chuncheon-1"
-          compartment_ocid = "${{ secrets.OCI_COMPARTMENT_OCID }}"
-          ssh_public_key   = "${{ secrets.SSH_PUBLIC_KEY }}"
-          EOF
+tenancy_ocid     = "$OCI_TENANCY_OCID"
+user_ocid        = "$OCI_USER_OCID"
+fingerprint      = "$OCI_FINGERPRINT"
+private_key_path = "~/.oci/oci_api_key.pem"
+region           = "ap-chuncheon-1"
+compartment_ocid = "$OCI_COMPARTMENT_OCID"
+ssh_public_key   = "$SSH_KEY_ONELINE"
+EOF
 
       - name: Terraform Init
         run: terraform init
