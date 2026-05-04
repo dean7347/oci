@@ -1,0 +1,7 @@
+tenancy_ocid     = "ocid1.tenancy.oc1..여기입력"
+user_ocid        = "ocid1.user.oc1..여기입력"
+fingerprint      = "xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx"
+private_key_path = "~/.oci/oci_api_key.pem"
+region           = "ap-chuncheon-1"
+compartment_ocid = "ocid1.tenancy.oc1..여기입력"
+ssh_public_key   = "ssh-rsa 여기입력"

@@ -1,0 +1,50 @@
+name: OCI ARM Instance Retry
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # 10분마다 실행
+  workflow_dispatch:          # 수동 실행 버튼
+
+jobs:
+  create-instance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Write OCI private key
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
+
+      - name: Write tfvars
+        run: |
+          cat > terraform.tfvars <<EOF
+          tenancy_ocid     = "${{ secrets.OCI_TENANCY_OCID }}"
+          user_ocid        = "${{ secrets.OCI_USER_OCID }}"
+          fingerprint      = "${{ secrets.OCI_FINGERPRINT }}"
+          private_key_path = "~/.oci/oci_api_key.pem"
+          region           = "ap-chuncheon-1"
+          compartment_ocid = "${{ secrets.OCI_COMPARTMENT_OCID }}"
+          ssh_public_key   = "${{ secrets.SSH_PUBLIC_KEY }}"
+          EOF
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+        continue-on-error: true
+
+      - name: 성공 시 워크플로우 비활성화
+        if: steps.apply.outcome == 'success'
+        run: |
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/retry.yml/disable
