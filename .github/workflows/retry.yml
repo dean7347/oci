@@ -2,7 +2,7 @@ name: OCI ARM Instance Retry
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # 10분마다 실행
+    - cron: '*/5 * * * *'  # 5분마다 실행
   workflow_dispatch:          # 수동 실행 버튼
 
 jobs:
@@ -19,7 +19,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: terraform.tfstate
-          key: terraform-state
+          key: terraform-state-${{ github.run_id }}
+          restore-keys: |
+            terraform-state-
 
       - name: Write OCI private key
         run: |
